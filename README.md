@@ -1,0 +1,2 @@
+# komonjo_OCR_object_detection
+古文書のOCRを物体検出アルゴリズムを用いて取り組む
