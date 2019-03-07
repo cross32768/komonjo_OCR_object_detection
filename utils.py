@@ -1,3 +1,6 @@
+from collections import Counter
+
+import numpy as np
 import pandas as pd
 from PIL import Image
 
@@ -29,3 +32,27 @@ def preprocess_annotation(path_to_annotation_csv, original_image_dir):
         processed_annotation_data[idx] = annotation_dict
 
     return processed_annotation_data
+
+
+def count_characters(preprocessed_annotation):
+    concated_char_kind_utf16 = np.array([])
+    for anno in preprocessed_annotation:
+        anno_data = anno['annotation_data']
+        char_kind_utf16 = anno_data[:,0]
+        concated_char_kind_utf16 = np.concatenate([concated_char_kind_utf16, char_kind_utf16])
+
+    counter_descending_order = Counter(concated_char_kind_utf16).most_common()
+    return counter_descending_order
+
+
+def make_maps_between_index_and_frequent_characters_utf16(preprocessed_annotation, n_kinds_of_characters):
+    counter_descending_order = count_characters(preprocessed_annotation)
+    utf16_to_index = {}
+    index_to_utf16 = {}
+    for index in range(n_kinds_of_characters):
+        utf16_to_index[counter_descending_order[index][0]] = index
+        index_to_utf16[index] = counter_descending_order[index][0]
+    return utf16_to_index, index_to_utf16
+
+
+def select_annotation_and_convert_ut16_to_index()
