@@ -4,12 +4,7 @@ import os
 from PIL import Image
 from tqdm import tqdm
 
-
-def normalize_dir_name(dir_name):
-    if dir_name[-1] == '/':
-        return dir_name
-    else:
-        return dir_name + '/'
+from utils import normalize_dir_name
 
 
 def main():
