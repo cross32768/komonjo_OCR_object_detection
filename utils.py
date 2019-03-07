@@ -1,4 +1,5 @@
 from collections import Counter
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
@@ -38,7 +39,7 @@ def count_characters(preprocessed_annotation):
     concated_char_kind_utf16 = np.array([])
     for anno in preprocessed_annotation:
         anno_data = anno['annotation_data']
-        char_kind_utf16 = anno_data[:,0]
+        char_kind_utf16 = anno_data[:, 0]
         concated_char_kind_utf16 = np.concatenate([concated_char_kind_utf16, char_kind_utf16])
 
     counter_descending_order = Counter(concated_char_kind_utf16).most_common()
@@ -55,4 +56,19 @@ def make_maps_between_index_and_frequent_characters_utf16(preprocessed_annotatio
     return utf16_to_index, index_to_utf16
 
 
-def select_annotation_and_convert_ut16_to_index()
+def select_annotation_and_convert_ut16_to_index(preprocessed_annotation, utf16_to_index):
+    selected_annotation = deepcopy(preprocessed_annotation)
+
+    for i, anno in enumerate(preprocessed_annotation):
+        selected_annotation_data = []
+        annotation_data = anno['annotation_data']
+
+        for char_anno in annotation_data:
+            utf16 = char_anno[0]
+            if utf16 in utf16_to_index.keys():
+                updated_char_anno = [utf16_to_index[utf16], *char_anno[1:]]
+                selected_annotation_data.append(updated_char_anno)
+
+        selected_annotation_data = np.array(selected_annotation_data)
+        selected_annotation[i]['annotation_data'] = selected_annotation_data
+    return selected_annotation
