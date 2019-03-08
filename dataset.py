@@ -83,7 +83,7 @@ class OCRDataset(Dataset):
 
             valid_index = label_per_class[0] > border
 
-            grid_index_for_x = torch.arange(n_grid).expand(n_grid, n_grid)
+            grid_index_for_x = torch.arange(n_grid).expand(n_grid, n_grid).float()
             grid_index_for_y = grid_index_for_x.transpose(0, 1)
 
             label_center_x_normalized = label_per_class[1] + grid_index_for_x
