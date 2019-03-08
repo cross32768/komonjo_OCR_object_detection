@@ -14,7 +14,7 @@ class OCRDataset(Dataset):
         self.annotation_list = annotation_list
         self.transform = transform
 
-        self.image_size = 640
+        self.image_size = 320
 
     def __len__(self):
         return len(self.annotation_list)

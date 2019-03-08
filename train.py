@@ -25,7 +25,7 @@ device = torch.device('cuda' if can_use_gpu else 'cpu')
 
 root_dir = '../../data/komonjo/200003076/'
 original_image_dir = root_dir + 'images/'
-resized_image_dir = root_dir + 'images_resized_640/'
+resized_image_dir = root_dir + 'images_resized_320/'
 log_dir = root_dir + 'logs/20190308/'
 
 path_to_annotation_csv = root_dir + '200003076_coordinate.csv'
@@ -47,12 +47,12 @@ tf = transforms.Compose([transforms.ToTensor(),
 train_dataset = OCRDataset(resized_image_dir, train_annotation_list, transform=tf)
 validation_dataset = OCRDataset(resized_image_dir, validation_annotation_list, transform=tf)
 
-batchsize_train = 64
+batchsize_train = 32
 batchsize_validation = batchsize_train
 train_loader = DataLoader(train_dataset, batch_size=batchsize_train, shuffle=True)
 validation_loader = DataLoader(validation_dataset, batch_size=batchsize_validation)
 
-net = OCRResNet18(config.N_KINDS_OF_CHARACTERS, pretrained=True)
+net = OCRResNet18(5*config.N_KINDS_OF_CHARACTERS, pretrained=True)
 net = net.to(device)
 
 optimizer = optim.SGD(net.parameters(), lr=0.0005, momentum=0.9, weight_decay=0.0005)
