@@ -1,3 +1,4 @@
+import numpy as np
 from PIL import Image
 
 import torch
@@ -55,12 +56,17 @@ class OCRDataset(Dataset):
         width_normalized = width / self.image_size
         height_normalized = height / self.image_size
 
-        center_x_grid = int(center_x_normalized)
-        center_y_grid = int(center_y_normalized)
+        center_x_grid = center_x_normalized.astype(np.int16)
+        center_y_grid = center_y_normalized.astype(np.int16)
         center_x_offset = center_x_normalized - center_x_grid
         center_y_offset = center_y_normalized - center_y_grid
 
-        label[char_index+0, center_y_grid, center_x_grid] = 1
+        center_x_offset = torch.from_numpy(center_x_offset).float()
+        center_y_offset = torch.from_numpy(center_y_offset).float()
+        width_normalized = torch.from_numpy(width_normalized).float()
+        height_normalized = torch.from_numpy(height_normalized).float()
+
+        label[char_index+0, center_y_grid, center_x_grid] = 1.0
         label[char_index+1, center_y_grid, center_x_grid] = center_x_offset
         label[char_index+2, center_y_grid, center_x_grid] = center_y_offset
         label[char_index+3, center_y_grid, center_x_grid] = width_normalized
