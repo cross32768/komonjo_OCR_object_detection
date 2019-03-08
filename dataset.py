@@ -66,10 +66,41 @@ class OCRDataset(Dataset):
         width_normalized = torch.from_numpy(width_normalized).float()
         height_normalized = torch.from_numpy(height_normalized).float()
 
-        label[char_index+0, center_y_grid, center_x_grid] = 1.0
-        label[char_index+1, center_y_grid, center_x_grid] = center_x_offset
-        label[char_index+2, center_y_grid, center_x_grid] = center_y_offset
-        label[char_index+3, center_y_grid, center_x_grid] = width_normalized
-        label[char_index+4, center_y_grid, center_x_grid] = height_normalized
+        label[5*char_index + 0, center_y_grid, center_x_grid] = 1.0
+        label[5*char_index + 1, center_y_grid, center_x_grid] = center_x_offset
+        label[5*char_index + 2, center_y_grid, center_x_grid] = center_y_offset
+        label[5*char_index + 3, center_y_grid, center_x_grid] = width_normalized
+        label[5*char_index + 4, center_y_grid, center_x_grid] = height_normalized
 
         return image, label
+
+    def label2bboxes(self, label, border=0.5):
+        bboxes = [None] * config.N_KINDS_OF_CHARACTERS
+        for char_index in range(config.N_KINDS_OF_CHARACTERS):
+            label_per_class = label[5*char_index:5*char_index + 5]
+            n_grid = label_per_class.size(1)
+            corresponding_image_size = n_grid * config.FE_STRIDE
+
+            valid_index = label_per_class[0] > border
+
+            grid_index_for_x = torch.arange(n_grid).expand(n_grid, n_grid)
+            grid_index_for_y = grid_index_for_x.transpose(0, 1)
+
+            label_center_x_normalized = label_per_class[1] + grid_index_for_x
+            label_center_y_normalized = label_per_class[2] + grid_index_for_y
+
+            center_x_normalized = label_center_x_normalized[valid_index]
+            center_y_normalized = label_center_y_normalized[valid_index]
+            width_normalized = label_per_class[3][valid_index]
+            height_normalized = label_per_class[4][valid_index]
+
+            center_x = center_x_normalized * config.FE_STRIDE
+            center_y = center_y_normalized * config.FE_STRIDE
+            width = width_normalized * corresponding_image_size
+            height = height_normalized * corresponding_image_size
+
+            bbox = np.array([center_x.numpy(), center_y.numpy(),
+                             width.numpy(), height.numpy()])
+            bboxes[char_index] = bbox
+
+        return bboxes
