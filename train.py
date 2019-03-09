@@ -14,10 +14,12 @@ from loss import OCRLoss
 from model import OCRResNet18
 import utils
 
+
 print('PyTorch version:', torch.__version__)
 print('torchvision version:', torchvision.__version__)
 can_use_gpu = torch.cuda.is_available()
 print('Is GPU available:', can_use_gpu)
+
 
 device = torch.device('cuda' if can_use_gpu else 'cpu')
 
@@ -27,11 +29,11 @@ resized_image_dir = root_dir + 'images_resized_' + str(config.RESIZE_IMAGE_SIZE)
 log_dir = root_dir + 'logs/20190309/'
 
 path_to_annotation_csv = root_dir + '200003076_coordinate.csv'
-preprocessed_annotation_list = utils.preprocess_annotation(path_to_annotation_csv, 
+preprocessed_annotation_list = utils.preprocess_annotation(path_to_annotation_csv,
                                                            original_image_dir)
-utf16_to_index, index_to_utf16 = utils.make_maps_between_index_and_frequent_characters_utf16(preprocessed_annotation_list, 
+utf16_to_index, index_to_utf16 = utils.make_maps_between_index_and_frequent_characters_utf16(preprocessed_annotation_list,
                                                                                              config.N_KINDS_OF_CHARACTERS)
-selected_annotation_list = utils.select_annotation_and_convert_ut16_to_index(preprocessed_annotation_list, 
+selected_annotation_list = utils.select_annotation_and_convert_ut16_to_index(preprocessed_annotation_list,
                                                                              utf16_to_index)
 train_annotation_list, validation_annotation_list = train_test_split(selected_annotation_list[:200],
                                                                      test_size=0.2,
@@ -39,6 +41,7 @@ train_annotation_list, validation_annotation_list = train_test_split(selected_an
 
 print('The number of training data:', len(train_annotation_list))
 print('The number of validation data:', len(validation_annotation_list))
+
 
 tf = transforms.Compose([transforms.ToTensor(),
                          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
@@ -53,13 +56,13 @@ validation_loader = DataLoader(validation_dataset, batch_size=batchsize_validati
 net = OCRResNet18(5*config.N_KINDS_OF_CHARACTERS, pretrained=True)
 net = net.to(device)
 
-optimizer = optim.SGD(net.parameters(), lr=0.0005, momentum=0.9, weight_decay=0.0005)
-criterion = OCRLoss([1.0, 1.0, 1.0])
+optimizer = optim.SGD(net.parameters(), lr=5e-4, momentum=0.9, weight_decay=5e-4)
+criterion = OCRLoss([config.LAMBDA_RESP, config.LAMBDA_COOR, config.LAMBDA_SIZE])
+
 
 def train(data_loader):
     net.train()
     running_loss = 0
-
     running_losses = np.zeros(3)
 
     for inputs, labels in data_loader:
@@ -80,6 +83,7 @@ def train(data_loader):
 
     return avarage_loss, average_losses
 
+
 def validation(data_loader):
     net.eval()
     running_loss = 0
@@ -96,8 +100,8 @@ def validation(data_loader):
             running_losses += np.array(losses)
 
     average_loss = running_loss / len(data_loader)
-    average_losses = running_losses / len(validation_loader)
-    
+    average_losses = running_losses / len(data_loader)
+
     return average_loss, average_losses
 
 
@@ -111,34 +115,32 @@ writer = tbx.SummaryWriter(log_dir + 'exp-1')
 for epoch in range(n_epochs):
     train_loss, train_losses = train(train_loader)
     validation_loss, validation_losses = validation(validation_loader)
-    
+
     # writer.add_scalar('settings/learning rate', optimizer.param_groups[0]['lr'], epoch)
-    
+
     writer.add_scalar('train/overall loss', train_loss, epoch)
     writer.add_scalar('train/responsible loss', train_losses[0], epoch)
     writer.add_scalar('train/coordinate loss', train_losses[1], epoch)
     writer.add_scalar('train/size loss', train_losses[2], epoch)
-    
+
     writer.add_scalar('validation/overall loss', validation_loss, epoch)
     writer.add_scalar('validation/responsible loss', validation_losses[0], epoch)
     writer.add_scalar('validation/coordinate loss', validation_losses[1], epoch)
     writer.add_scalar('validation/size loss', validation_losses[2], epoch)
-    
+
     train_loss_list.append(train_loss)
     train_losses_list.append(train_losses)
     validation_loss_list.append(validation_loss)
     validation_losses_list.append(validation_losses)
-    
+
     if (epoch+1) % 5 == 0:
         torch.save(net.state_dict(), log_dir + 'weight_%03d.pth' % (epoch+1))
-    
-    print('epoch[%3d/%3d] train_loss:%2.4f details:[resp:%1.4f coor:%1.4f size:%1.4f]'                        
-         % (epoch+1, n_epochs,
-            train_loss, 
-            train_losses[0], train_losses[1], train_losses[2]))
-    print('          validation_loss:%2.4f details:[resp:%1.4f coor:%1.4f size:%1.4f]'                                        
-         % (validation_loss, 
-            validation_losses[0], validation_losses[1], validation_losses[2]))
+
+    print('epoch[%3d/%3d] train_loss:%2.4f details:[resp:%1.4f coor:%1.4f size:%1.4f]'
+          % (epoch+1, n_epochs,
+             train_loss, train_losses[0], train_losses[1], train_losses[2]))
+    print('          validation_loss:%2.4f details:[resp:%1.4f coor:%1.4f size:%1.4f]'
+          % (validation_loss, validation_losses[0], validation_losses[1], validation_losses[2]))
 
 writer.close()
 np.save(log_dir + 'train_loss_list.npy', np.array(train_loss_list))
