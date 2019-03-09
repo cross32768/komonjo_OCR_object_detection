@@ -104,7 +104,7 @@ class OCRDataset(Dataset):
             width = width_normalized * corresponding_image_size
             height = height_normalized * corresponding_image_size
 
-            bbox = np.array([confidence,
+            bbox = np.array([confidence.numpy(),
                              center_x.numpy(), center_y.numpy(),
                              width.numpy(), height.numpy()])
             bboxes[char_index] = bbox
