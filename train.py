@@ -4,16 +4,14 @@ from sklearn.model_selection import train_test_split
 import torch
 from torch import optim
 from torch.utils.data import DataLoader
-
 import torchvision
 from torchvision import transforms
-
 import tensorboardX as tbx
 
 import config
 from dataset import OCRDataset
-from model import OCRResNet18
 from loss import OCRLoss
+from model import OCRResNet18
 import utils
 
 print('PyTorch version:', torch.__version__)
@@ -25,8 +23,8 @@ device = torch.device('cuda' if can_use_gpu else 'cpu')
 
 root_dir = '../../data/komonjo/200003076/'
 original_image_dir = root_dir + 'images/'
-resized_image_dir = root_dir + 'images_resized_320/'
-log_dir = root_dir + 'logs/20190308/'
+resized_image_dir = root_dir + 'images_resized_' + str(config.RESIZE_IMAGE_SIZE) + '/'
+log_dir = root_dir + 'logs/20190309/'
 
 path_to_annotation_csv = root_dir + '200003076_coordinate.csv'
 preprocessed_annotation_list = utils.preprocess_annotation(path_to_annotation_csv, 

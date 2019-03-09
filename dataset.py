@@ -41,6 +41,8 @@ class OCRDataset(Dataset):
             "self.image_size must be multiple of feature extractor's stride."
         n_grid = int(self.image_size / config.FE_STRIDE)
         label = torch.zeros(n_label_channel, n_grid, n_grid)
+        if len(annotation_data) == 0:
+            return label
 
         char_index = annotation_data[:, 0]
         min_x = annotation_data[:, 1]
