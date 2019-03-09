@@ -29,6 +29,13 @@ class OCRDataset(Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
+        shrink_rate = [self.image_size / original_image_size['Width'],
+                       self.image_size / original_image_size['Height']]
+        label = self.anno2label(annotation_data, shrink_rate)
+
+        return image, label
+
+    def anno2label(self, annotation_data, shrink_rate):
         n_label_channel = 5 * config.N_KINDS_OF_CHARACTERS
         assert self.image_size % config.FE_STRIDE == 0, \
             "self.image_size must be multiple of feature extractor's stride."
@@ -44,8 +51,6 @@ class OCRDataset(Dataset):
         center_x = min_x + 0.5*width
         center_y = min_y + 0.5*height
 
-        shrink_rate = [self.image_size / original_image_size['Width'],
-                       self.image_size / original_image_size['Height']]
         center_x = center_x * shrink_rate[0]
         center_y = center_y * shrink_rate[1]
         width = width * shrink_rate[0]
@@ -72,16 +77,16 @@ class OCRDataset(Dataset):
         label[5*char_index + 3, center_y_grid, center_x_grid] = width_normalized
         label[5*char_index + 4, center_y_grid, center_x_grid] = height_normalized
 
-        return image, label
+        return label
 
-    def label2bboxes(self, label, border=0.5):
+    def label2bboxes(self, label, confidence_border=0.5):
         bboxes = [None] * config.N_KINDS_OF_CHARACTERS
         for char_index in range(config.N_KINDS_OF_CHARACTERS):
             label_per_class = label[5*char_index:5*char_index + 5]
             n_grid = label_per_class.size(1)
             corresponding_image_size = n_grid * config.FE_STRIDE
 
-            valid_index = label_per_class[0] > border
+            valid_index = label_per_class[0] > confidence_border
             confidence = label_per_class[0][valid_index]
 
             grid_index_for_x = torch.arange(n_grid).expand(n_grid, n_grid).float()
