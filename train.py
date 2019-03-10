@@ -26,7 +26,7 @@ device = torch.device('cuda' if can_use_gpu else 'cpu')
 root_dir = '../../data/komonjo/200003076/'
 original_image_dir = root_dir + 'images/'
 resized_image_dir = root_dir + 'images_resized_' + str(config.RESIZE_IMAGE_SIZE) + '/'
-log_dir = root_dir + 'logs/20190309/'
+log_dir = root_dir + 'logs/20190310/'
 
 path_to_annotation_csv = root_dir + '200003076_coordinate.csv'
 preprocessed_annotation_list = utils.preprocess_annotation(path_to_annotation_csv,
@@ -105,7 +105,7 @@ def validation(data_loader):
     return average_loss, average_losses
 
 
-n_epochs = 10
+n_epochs = 100
 train_loss_list = []
 train_losses_list = []
 validation_loss_list = []
