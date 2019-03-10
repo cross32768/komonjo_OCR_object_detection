@@ -21,7 +21,7 @@ class OCRLoss(nn.Module):
         mask = label_resp.clone()
         ratio_of_one = mask.sum() / mask.numel()
         weight_for_resp = mask.clone()
-        weight_for_resp[weight_for_resp < 0.5] = ratio_of_one
+        weight_for_resp[weight_for_resp < 0.5] = ratio_of_one * 0.5
         mask_for_bbox = torch.cat([mask.clone(), mask.clone()], dim=1)
 
         loss_resp = weight_for_resp * (output_resp-label_resp).pow_(2)

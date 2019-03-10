@@ -11,7 +11,7 @@ import tensorboardX as tbx
 import config
 from dataset import OCRDataset
 from loss import OCRLoss
-from model import OCRResNet18
+from model import OCRResNet18, OCRUNet18
 import utils
 
 
@@ -35,7 +35,7 @@ utf16_to_index, index_to_utf16 = utils.make_maps_between_index_and_frequent_char
                                                                                              config.N_KINDS_OF_CHARACTERS)
 selected_annotation_list = utils.select_annotation_and_convert_ut16_to_index(preprocessed_annotation_list,
                                                                              utf16_to_index)
-train_annotation_list, validation_annotation_list = train_test_split(selected_annotation_list[:200],
+train_annotation_list, validation_annotation_list = train_test_split(selected_annotation_list[:250],
                                                                      test_size=0.2,
                                                                      random_state=config.RANDOM_SEED)
 
@@ -48,15 +48,15 @@ tf = transforms.Compose([transforms.ToTensor(),
 train_dataset = OCRDataset(resized_image_dir, train_annotation_list, transform=tf)
 validation_dataset = OCRDataset(resized_image_dir, validation_annotation_list, transform=tf)
 
-batchsize_train = 32
+batchsize_train = 50
 batchsize_validation = batchsize_train
 train_loader = DataLoader(train_dataset, batch_size=batchsize_train, shuffle=True)
 validation_loader = DataLoader(validation_dataset, batch_size=batchsize_validation)
 
-net = OCRResNet18(5*config.N_KINDS_OF_CHARACTERS, pretrained=True)
+net = OCRUNet18(5*config.N_KINDS_OF_CHARACTERS, pretrained=True)
 net = net.to(device)
 
-optimizer = optim.SGD(net.parameters(), lr=5e-4, momentum=0.9, weight_decay=5e-4)
+optimizer = optim.SGD(net.parameters(), lr=1e-3, momentum=0.9, weight_decay=5e-4)
 criterion = OCRLoss([config.LAMBDA_RESP, config.LAMBDA_COOR, config.LAMBDA_SIZE])
 
 
@@ -105,7 +105,7 @@ def validation(data_loader):
     return average_loss, average_losses
 
 
-n_epochs = 100
+n_epochs = 300
 train_loss_list = []
 train_losses_list = []
 validation_loss_list = []
@@ -116,7 +116,7 @@ for epoch in range(n_epochs):
     train_loss, train_losses = train(train_loader)
     validation_loss, validation_losses = validation(validation_loader)
 
-    # writer.add_scalar('settings/learning rate', optimizer.param_groups[0]['lr'], epoch)
+    writer.add_scalar('settings/learning rate', optimizer.param_groups[0]['lr'], epoch)
 
     writer.add_scalar('train/overall loss', train_loss, epoch)
     writer.add_scalar('train/responsible loss', train_losses[0], epoch)
@@ -135,6 +135,9 @@ for epoch in range(n_epochs):
 
     if (epoch+1) % 5 == 0:
         torch.save(net.state_dict(), log_dir + 'weight_%03d.pth' % (epoch+1))
+    
+    if (epoch+1) % 50 == 0:
+        optimizer.param_groups[0]['lr'] /= 2
 
     print('epoch[%3d/%3d] train_loss:%2.4f details:[resp:%1.4f coor:%1.4f size:%1.4f]'
           % (epoch+1, n_epochs,
