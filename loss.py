@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from torch.nn import functional as F
 
 import config
 
@@ -24,7 +25,8 @@ class OCRLoss(nn.Module):
         weight_for_resp[weight_for_resp < 0.5] = ratio_of_one * 0.5
         mask_for_bbox = torch.cat([mask.clone(), mask.clone()], dim=1)
 
-        loss_resp = weight_for_resp * (output_resp-label_resp).pow_(2)
+        loss_resp = weight_for_resp * F.binary_cross_entropy(output_resp, label_resp, reduction='none')
+        # loss_resp = weight_for_resp * (output_resp-label_resp).pow_(2)
         loss_coor = mask_for_bbox * (output_coor-label_coor).pow_(2)
         loss_size = mask_for_bbox * (output_size.sqrt()-label_size.sqrt()).pow_(2)
 

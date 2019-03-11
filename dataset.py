@@ -81,6 +81,13 @@ class OCRDataset(Dataset):
 
         return label
 
+    
+    def update_image_size(self, candidate_list):
+        new_image_size = np.random.choice(candidate_list)
+        self.image_size = new_image_size
+        self.image_dir = self.image_dir[:-4] + str(new_image_size) + '/'
+
+
     def label2bboxes(self, label, confidence_border=0.5):
         bboxes = [None] * config.N_KINDS_OF_CHARACTERS
         for char_index in range(config.N_KINDS_OF_CHARACTERS):

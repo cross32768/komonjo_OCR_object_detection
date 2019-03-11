@@ -72,3 +72,7 @@ def select_annotation_and_convert_ut16_to_index(preprocessed_annotation, utf16_t
         selected_annotation_data = np.array(selected_annotation_data)
         selected_annotation[i]['annotation_data'] = selected_annotation_data
     return selected_annotation
+
+
+def prepare_selected_annotation_from_dataset_indexes(dataset_index_list):
+    1+1
