@@ -27,7 +27,7 @@ root_dir = '../../data/ugetu_koshoku/'
 original_image_dir1 = '../../data/komonjo/200003076/images/'
 original_image_dir2 = '../../data/komonjo/200014740/images/'
 resized_image_dir = root_dir + 'images_resized_' + str(config.RESIZE_IMAGE_SIZE) + '/'
-log_dir = root_dir + 'logs/20190311/'
+log_dir = root_dir + 'logs/20190311_2/'
 
 path_to_annotation_csv1 = '../../data/komonjo/200003076/200003076_coordinate.csv'
 path_to_annotation_csv2 = '../../data/komonjo/200014740/200014740_coordinate.csv'
