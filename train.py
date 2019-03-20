@@ -54,6 +54,8 @@ def train(data_loader):
     net.train()
     running_loss = 0
     running_losses = np.zeros(3)
+    
+    data_loader.dataset.update_image_size(config.RESIZE_IMAGE_SIZE_CANDIDATES)
 
     for inputs, labels in data_loader:
         inputs, labels = inputs.to(device), labels.to(device)
