@@ -149,32 +149,31 @@ class OCRDatasetWithAnchor(Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
-        shrink_rate = [self.image_size / original_image_size['Width'],
-                       self.image_size / original_image_size['Height']]
-        label = self.anno2label(annotation_data, shrink_rate)
+        label = self.anno2label(annotation_data, original_image_size)
 
         return image, label
 
     def calculate_anchor_boxes(self):
         anchor_boxes = [None] * config.N_KINDS_OF_CHARACTERS
         for i in range(config.N_KINDS_OF_CHARACTERS):
-            concated_annotation_data_for_index = np.array([]).reshape(0, 5)
+            concated_annotation_data_for_index = np.array([]).reshape(0, 2)
             for annotation in self.annotation_list:
                 annotation_data = annotation['annotation_data']
+                original_image_size = annotation['image_size']
                 if len(annotation_data) != 0:
                     annotation_data_for_index = annotation_data[annotation_data[:, 0] == i]
+                    anchor_info = np.zeros(2, len(annotation_data_for_index))
+                    anchor_info[0] = annotation_data_for_index[0] / original_image_size['Width']
+                    anchor_info[1] = annotation_data_for_index[1] / original_image_size['Height']
                     concated_annotation_data_for_index = np.concatenate([concated_annotation_data_for_index, 
-                                                                         annotation_data_for_index])
-            widths = concated_annotation_data_for_index[:, 3]
-            heights = concated_annotation_data_for_index[:, 4]
+                                                                         anchor_info])
+            widths = concated_annotation_data_for_index[0]
+            heights = concated_annotation_data_for_index[1]
             width_mean = widths.mean()
             height_mean = heights.mean()
-            anchor_boxes[i] = [width_mean, height * shrink_rate[0]
-        height = height * shrink_rate[1]_mean]
-        return anchor_boxes * shrink_rate[0]
-        height = height * shrink_rate[1]
- * shrink_rate[0]
-        height = height * shrink_rate[1]
+            anchor_boxes[i] = [width_mean, height_mean]
+        return anchor_boxes
+
     def anno2label(self, annotation_data, shrink_ * shrink_rate[0]
         height = height * shrink_rate[1]rate):
         n_label_channel = 5 * config.N_KINDS_OF_C * shrink_rate[0]
