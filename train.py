@@ -11,7 +11,7 @@ import tensorboardX as tbx
 import config
 from dataset import OCRDataset
 from loss import OCRLoss
-from model import OCRResNet18, OCRUNet18
+from model import OCRResNet18, OCRResNet50, OCRVGG19
 import utils
 
 
@@ -23,24 +23,9 @@ print('Is GPU available:', can_use_gpu)
 
 device = torch.device('cuda' if can_use_gpu else 'cpu')
 
-root_dir = '../../data/ugetu_koshoku/'
-original_image_dir1 = '../../data/komonjo/200003076/images/'
-original_image_dir2 = '../../data/komonjo/200014740/images/'
-resized_image_dir = root_dir + 'images_resized_' + str(config.RESIZE_IMAGE_SIZE) + '/'
-log_dir = root_dir + 'logs/20190311_2/'
-
-path_to_annotation_csv1 = '../../data/komonjo/200003076/200003076_coordinate.csv'
-path_to_annotation_csv2 = '../../data/komonjo/200014740/200014740_coordinate.csv'
-preprocessed_annotation_list1 = utils.preprocess_annotation(path_to_annotation_csv1,
-                                                            original_image_dir1)
-preprocessed_annotation_list2 = utils.preprocess_annotation(path_to_annotation_csv2,
-                                                            original_image_dir2)
-preprocessed_annotation_list = preprocessed_annotation_list1 + preprocessed_annotation_list2
-utf16_to_index, index_to_utf16 = utils.make_maps_between_index_and_frequent_characters_utf16(preprocessed_annotation_list,
-                                                                                             config.N_KINDS_OF_CHARACTERS)
-selected_annotation_list = utils.select_annotation_and_convert_ut16_to_index(preprocessed_annotation_list,
-                                                                             utf16_to_index)
-train_annotation_list, validation_annotation_list = train_test_split(selected_annotation_list[10:-10],
+log_dir = '../../data/komonjo/logs/20190320/'
+selected_annotation_list = utils.prepare_selected_annotation_from_dataset_indexes([0,1,2])
+train_annotation_list, validation_annotation_list = train_test_split(selected_annotation_list,
                                                                      test_size=0.2,
                                                                      random_state=config.RANDOM_SEED)
 
@@ -50,8 +35,8 @@ print('The number of validation data:', len(validation_annotation_list))
 
 tf = transforms.Compose([transforms.ToTensor(),
                          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-train_dataset = OCRDataset(resized_image_dir, train_annotation_list, transform=tf)
-validation_dataset = OCRDataset(resized_image_dir, validation_annotation_list, transform=tf)
+train_dataset = OCRDataset(train_annotation_list, transform=tf)
+validation_dataset = OCRDataset(validation_annotation_list, transform=tf)
 
 batchsize_train = 32
 batchsize_validation = batchsize_train
@@ -143,8 +128,8 @@ for epoch in range(n_epochs):
     if (epoch+1) % 5 == 0:
         torch.save(net.state_dict(), log_dir + 'weight_%03d.pth' % (epoch+1))
     
-    if (epoch+1) % 50 == 0:
-        optimizer.param_groups[0]['lr'] /= 4
+    if (epoch+1) % 100 == 0:
+        optimizer.param_groups[0]['lr'] /= 10
 
     print('epoch[%3d/%3d] train_loss:%2.4f details:[resp:%1.4f coor:%1.4f size:%1.4f]'
           % (epoch+1, n_epochs,
