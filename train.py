@@ -24,7 +24,7 @@ print('Is GPU available:', can_use_gpu)
 device = torch.device('cuda' if can_use_gpu else 'cpu')
 
 log_dir = '../../data/komonjo/logs/20190320/'
-selected_annotation_list = utils.prepare_selected_annotation_from_dataset_indexes([0,1,2])
+selected_annotation_list = utils.prepare_selected_annotation_from_dataset_indexes([6, 12])
 train_annotation_list, validation_annotation_list = train_test_split(selected_annotation_list,
                                                                      test_size=0.2,
                                                                      random_state=config.RANDOM_SEED)
