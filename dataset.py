@@ -5,27 +5,31 @@ import torch
 from torch.utils.data import Dataset
 
 import config
-from utils import normalize_dir_name
 
 
 class OCRDataset(Dataset):
-    def __init__(self, image_dir, annotation_list, transform=None):
-        self.image_dir = normalize_dir_name(image_dir)
+    def __init__(self, annotation_list, transform=None):
         self.annotation_list = annotation_list
         self.transform = transform
 
-        self.image_size = config.RESIZE_IMAGE_SIZE
+        self.image_size = 0
 
     def __len__(self):
         return len(self.annotation_list)
 
     def __getitem__(self, idx):
         annotation = self.annotation_list[idx]
-        image_name = annotation['image_name']
+        original_image_path = annotation['image_path']
         original_image_size = annotation['image_size']
         annotation_data = annotation['annotation_data']
 
-        image = Image.open(self.image_dir + image_name)
+        splited_original_image_path = original_image_path.split('/')
+        image_path = ('/'.join(splited_original_image_path[:-1])
+                      + '_resized_'
+                      + str(self.image_size)
+                      + '/'
+                      + splited_original_image_path[-1])
+        image = Image.open(image_path)
         if self.transform is not None:
             image = self.transform(image)
 
@@ -81,12 +85,9 @@ class OCRDataset(Dataset):
 
         return label
 
-    
     def update_image_size(self, candidate_list):
         new_image_size = np.random.choice(candidate_list)
         self.image_size = new_image_size
-        self.image_dir = self.image_dir[:-4] + str(new_image_size) + '/'
-
 
     def label2bboxes(self, label, confidence_border=0.5):
         bboxes = [None] * config.N_KINDS_OF_CHARACTERS
