@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
+import config
+
 
 def normalize_dir_name(dir_name):
     if dir_name[-1] == '/':
@@ -20,7 +22,7 @@ def preprocess_annotation(path_to_annotation_csv, original_image_dir):
     image_dir = normalize_dir_name(original_image_dir)
 
     for idx, image_name in enumerate(image_name_list):
-        image_file_name = image_name + '.jpg'
+        image_file_name = image_dir + image_name + '.jpg'
         width, height = Image.open(image_dir + image_file_name).size[:2]
 
         annotation_data_for_an_image = annotation_data[annotation_data.Image == image_name]
@@ -75,4 +77,16 @@ def select_annotation_and_convert_ut16_to_index(preprocessed_annotation, utf16_t
 
 
 def prepare_selected_annotation_from_dataset_indexes(dataset_index_list):
-    1+1
+    preprocessed_annotations = []
+    for dataset_index in dataset_index_list:
+        dataset_dir = config.DATASET_DIR_LIST[dataset_index]
+        path_to_annotation_csv = dataset_dir + dataset_dir.split('/')[-2] + '_coordinate.csv'
+        original_image_dir = dataset_dir + 'images/'
+        preprocessed_annotations += preprocess_annotation(path_to_annotation_csv,
+                                                          original_image_dir)
+    utf16_to_index, index_to_utf16 = \
+        make_maps_between_index_and_frequent_characters_utf16(preprocessed_annotations,
+                                                              config.N_KINDS_OF_CHARACTERS)
+    selected_annotation = select_annotation_and_convert_ut16_to_index(preprocessed_annotations,
+                                                                      utf16_to_index)
+    return selected_annotation, index_to_utf16
