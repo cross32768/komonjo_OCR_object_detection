@@ -11,7 +11,7 @@ import tensorboardX as tbx
 import config
 from dataset import OCRDataset
 from loss import OCRLoss
-from model import OCRResNet18, OCRResNet50, OCRVGG19
+from model import OCRResNet18, OCRResNet34, OCRResNet50, OCRVGG16, OCRVGG19
 import utils
 
 
@@ -24,12 +24,12 @@ print('Is GPU available:', can_use_gpu)
 device = torch.device('cuda' if can_use_gpu else 'cpu')
 
 log_dir = '../../data/komonjo/logs/20190321_2/'
-# selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([0,  1,  2,  3,  4,
-#                                                                                      5,  6,  10, 11, 12,
-#                                                                                      14, 15, 16, 17, 18, 
-#                                                                                      19, 20, 21, 22, 23, 
-#                                                                                      24, 25, 26])
-selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([6, 12])
+selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([0,  1,  2,  3,  4,
+                                                                                      5,  6,  10, 11, 12,
+                                                                                      14, 15, 16, 17, 18, 
+                                                                                      19, 20, 21, 22, 23, 
+                                                                                      24, 25, 26])
+# selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([6, 12])
 train_annotation_list, validation_annotation_list = train_test_split(selected_annotation_list,
                                                                      test_size=0.2,
                                                                      random_state=config.RANDOM_SEED)
@@ -43,12 +43,12 @@ tf = transforms.Compose([transforms.ToTensor(),
 train_dataset = OCRDataset(train_annotation_list, transform=tf)
 validation_dataset = OCRDataset(validation_annotation_list, transform=tf)
 
-batchsize_train = 32
+batchsize_train = 16
 batchsize_validation = batchsize_train
 train_loader = DataLoader(train_dataset, batch_size=batchsize_train, shuffle=True)
 validation_loader = DataLoader(validation_dataset, batch_size=batchsize_validation)
 
-net = OCRResNet18(5*config.N_KINDS_OF_CHARACTERS, pretrained=True)
+net = OCRResNet50(5*config.N_KINDS_OF_CHARACTERS, pretrained=True)
 net = net.to(device)
 
 optimizer = optim.SGD(net.parameters(), lr=1e-3, momentum=0.9, weight_decay=5e-4)
@@ -80,10 +80,10 @@ def train(data_loader):
     avarage_loss = running_loss / len(data_loader)
     average_losses = running_losses / len(data_loader)
 
-    return avarage_loss, average_losses
-
-
-def validation(data_loader):
+    return avara井手上漠ge_loss, average_losses
+井手上漠
+井手上漠
+def validation(d井手上漠ata_loader):
     net.eval()
     running_loss = 0
     running_losses = np.zeros(3)
@@ -104,7 +104,7 @@ def validation(data_loader):
     return average_loss, average_losses
 
 
-n_epochs = 100
+n_epochs = 500
 train_loss_list = []
 train_losses_list = []
 validation_loss_list = []
