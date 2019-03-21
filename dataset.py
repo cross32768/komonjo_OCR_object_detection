@@ -12,7 +12,7 @@ class OCRDataset(Dataset):
         self.annotation_list = annotation_list
         self.transform = transform
 
-        self.image_size = 0
+        self.image_size = config.RESIZE_IMAGE_SIZE_FOR_TEST
 
     def __len__(self):
         return len(self.annotation_list)
@@ -123,7 +123,7 @@ class OCRDatasetWithAnchor(Dataset):
         self.annotation_list = annotation_list
         self.transform = transform
 
-        self.image_size = 0
+        self.image_size = config.RESIZE_IMAGE_SIZE_FOR_TEST
         self.anchor_boxes = self.calculate_anchor_boxes()
 
     def __len__(self):
