@@ -23,8 +23,13 @@ print('Is GPU available:', can_use_gpu)
 
 device = torch.device('cuda' if can_use_gpu else 'cpu')
 
-log_dir = '../../data/komonjo/logs/20190320/'
-selected_annotation_list = utils.prepare_selected_annotation_from_dataset_indexes([6, 12])
+log_dir = '../../data/komonjo/logs/20190321_2/'
+# selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([0,  1,  2,  3,  4,
+#                                                                                      5,  6,  10, 11, 12,
+#                                                                                      14, 15, 16, 17, 18, 
+#                                                                                      19, 20, 21, 22, 23, 
+#                                                                                      24, 25, 26])
+selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([6, 12])
 train_annotation_list, validation_annotation_list = train_test_split(selected_annotation_list,
                                                                      test_size=0.2,
                                                                      random_state=config.RANDOM_SEED)
@@ -99,7 +104,7 @@ def validation(data_loader):
     return average_loss, average_losses
 
 
-n_epochs = 500
+n_epochs = 100
 train_loss_list = []
 train_losses_list = []
 validation_loss_list = []
@@ -130,7 +135,7 @@ for epoch in range(n_epochs):
     if (epoch+1) % 5 == 0:
         torch.save(net.state_dict(), log_dir + 'weight_%03d.pth' % (epoch+1))
     
-    if (epoch+1) % 100 == 0:
+    if (epoch+1) % 150 == 0:
         optimizer.param_groups[0]['lr'] /= 10
 
     print('epoch[%3d/%3d] train_loss:%2.4f details:[resp:%1.4f coor:%1.4f size:%1.4f]'
