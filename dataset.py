@@ -240,7 +240,7 @@ class OCRDatasetWithAnchor(Dataset):
             height_change_from_anchor = label_per_class[4][valid_index]
 
             width_normalized = np.exp(width_change_from_anchor) * self.anchor_boxes[char_index, 0]
-            hegith_normalized = np.exp(height_change_from_anchor) * self.anchor_boxes[char_index, 1]
+            height_normalized = np.exp(height_change_from_anchor) * self.anchor_boxes[char_index, 1]
 
             center_x = center_x_normalized * config.FE_STRIDE
             center_y = center_y_normalized * config.FE_STRIDE
