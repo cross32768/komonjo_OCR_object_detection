@@ -80,10 +80,10 @@ def train(data_loader):
     avarage_loss = running_loss / len(data_loader)
     average_losses = running_losses / len(data_loader)
 
-    return avara井手上漠ge_loss, average_losses
-井手上漠
-井手上漠
-def validation(d井手上漠ata_loader):
+    return avarage_loss, average_losses
+
+
+def validation(data_loader):
     net.eval()
     running_loss = 0
     running_losses = np.zeros(3)
@@ -135,7 +135,7 @@ for epoch in range(n_epochs):
     if (epoch+1) % 5 == 0:
         torch.save(net.state_dict(), log_dir + 'weight_%03d.pth' % (epoch+1))
     
-    if (epoch+1) % 150 == 0:
+    if (epoch+1) % 200 == 0:
         optimizer.param_groups[0]['lr'] /= 10
 
     print('epoch[%3d/%3d] train_loss:%2.4f details:[resp:%1.4f coor:%1.4f size:%1.4f]'
