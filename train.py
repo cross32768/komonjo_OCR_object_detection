@@ -34,10 +34,13 @@ print('The number of training data:', len(train_annotation_list))
 print('The number of validation data:', len(validation_annotation_list))
 
 
-tf = transforms.Compose([transforms.ToTensor(),
-                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-train_dataset = OCRDataset(train_annotation_list, transform=tf)
-validation_dataset = OCRDataset(validation_annotation_list, transform=tf)
+tf_train = transforms.Compose([transforms.RandomApply([transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.05)], p=0.5),
+                               transforms.ToTensor(),
+                               transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+tf_validation = transforms.Compose([transforms.ToTensor(),
+                                    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+train_dataset = OCRDataset(train_annotation_list, transform=tf_train)
+validation_dataset = OCRDataset(validation_annotation_list, transform=tf_validation)
 
 batchsize_train = 32
 batchsize_validation = batchsize_train
