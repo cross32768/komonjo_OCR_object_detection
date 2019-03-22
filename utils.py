@@ -90,3 +90,16 @@ def prepare_selected_annotation_from_dataset_indexes(dataset_index_list):
     selected_annotation = select_annotation_and_convert_ut16_to_index(preprocessed_annotations,
                                                                       utf16_to_index)
     return selected_annotation, index_to_utf16
+
+
+def compute_IOU(bbox1, bbox2):
+    x_min1, y_min1, x_max1, y_max1 = bbox1
+    x_min2, y_min2, x_max2, y_max2 = bbox2
+    intersect_w = np.maximum(np.minimum(x_max1, x_max2) - np.maximum(x_min1, x_min2), 0)
+    intersect_h = np.maximum(np.minimum(y_max1, y_max2) - np.maximum(y_min1, y_min2), 0)
+    intersection = intersect_w * intersect_h
+
+    union = (x_max1-x_min1)*(y_max1-y_min1) + (x_max2-x_min2)*(y_max2-y_min2) - intersection
+    epsilon = 1e-6
+
+    return intersection / (union + epsilon)

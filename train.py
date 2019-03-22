@@ -24,7 +24,11 @@ print('Is GPU available:', can_use_gpu)
 device = torch.device('cuda' if can_use_gpu else 'cpu')
 
 log_dir = '../../data/komonjo/logs/20190322/'
-selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([6, 12])
+selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([ 0,  1,  2,  3,  4,
+                                                                                       5,  6,  10, 11, 12,
+                                                                                      14, 15, 16, 17, 18, 
+                                                                                      19, 20, 21, 22, 23, 
+                                                                                      24, 25, 26])
 # selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([6, 12])
 train_annotation_list, validation_annotation_list = train_test_split(selected_annotation_list,
                                                                      test_size=0.2,
@@ -42,7 +46,7 @@ tf_validation = transforms.Compose([transforms.ToTensor(),
 train_dataset = OCRDataset(train_annotation_list, transform=tf_train)
 validation_dataset = OCRDataset(validation_annotation_list, transform=tf_validation)
 
-batchsize_train = 32
+batchsize_train = 16
 batchsize_validation = batchsize_train
 train_loader = DataLoader(train_dataset, batch_size=batchsize_train, shuffle=True)
 validation_loader = DataLoader(validation_dataset, batch_size=batchsize_validation)
