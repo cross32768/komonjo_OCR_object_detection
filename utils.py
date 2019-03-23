@@ -92,9 +92,9 @@ def prepare_selected_annotation_from_dataset_indexes(dataset_index_list):
     return selected_annotation, index_to_utf16
 
 
-def compute_IOU(bbox1, bbox2):
-    x_min1, y_min1, x_max1, y_max1 = bbox1
-    x_min2, y_min2, x_max2, y_max2 = bbox2
+def compute_IOU(coordinates1, coordinates2):
+    x_min1, y_min1, x_max1, y_max1 = coordinates1
+    x_min2, y_min2, x_max2, y_max2 = coordinates2
     intersect_w = np.maximum(np.minimum(x_max1, x_max2) - np.maximum(x_min1, x_min2), 0)
     intersect_h = np.maximum(np.minimum(y_max1, y_max2) - np.maximum(y_min1, y_min2), 0)
     intersection = intersect_w * intersect_h
@@ -103,3 +103,6 @@ def compute_IOU(bbox1, bbox2):
     epsilon = 1e-6
 
     return intersection / (union + epsilon)
+
+
+#def NMS(bboxes1):
