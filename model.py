@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from torch.utils import model_zoo
 from torchvision import models
 
 
@@ -54,9 +55,33 @@ class OCRResNet34(nn.Module):
 
 
 class OCRResNet50(nn.Module):
-    def __init__(self, n_out, pretrained=True):
+    def __init__(self, n_out, pretrained_choice=0):
         super(OCRResNet50, self).__init__()
-        resnet50 = models.resnet50(pretrained=pretrained)
+        if pretrained_choice == 0:
+            resnet50 = models.resnet50(pretrained=False)
+        elif pretrained_choice == 1:
+            resnet50 = models.resnet50(pretrained=True)
+        elif pretrained_choice == 2:
+            # resnet50_trained_on_SIN
+            model_url = 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/6f41d2e86fc60566f78de64ecff35cc61eb6436f/resnet50_train_60_epochs-c8e5653e.pth.tar'
+            resnet50 = models.resnet50(pretrained=False)
+            checkpoint = model_zoo.load_url(model_url)
+            model.load_state_dict(checkpoint['state_dict'])
+        elif pretrained_choice == 3:
+            # resnet50_trained_on_SIN_and_IN
+            model_url = 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/60b770e128fffcbd8562a3ab3546c1a735432d03/resnet50_train_45_epochs_combined_IN_SF-2a0d100e.pth.tar'
+            resnet50 = models.resnet50(pretrained=False)
+            checkpoint = model_zoo.load_url(model_url)
+            model.load_state_dict(checkpoint['state_dict'])
+        elif pretrained_choice == 4:
+            # resnet50_trained_on_SIN_and_IN_then_finetuned_on_IN
+            model_url = 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/60b770e128fffcbd8562a3ab3546c1a735432d03/resnet50_finetune_60_epochs_lr_decay_after_30_start_resnet50_train_45_epochs_combined_IN_SF-ca06340c.pth.tar'
+            resnet50 = models.resnet50(pretrained=False)
+            checkpoint = model_zoo.load_url(model_url)
+            model.load_state_dict(checkpoint['state_dict'])
+        else:
+            raise NotImplementedError
+
         self.feature_extractor = nn.Sequential(*list(resnet50.children())[:-2])
 
         self.additional_layers = nn.Sequential(
