@@ -61,26 +61,21 @@ class OCRResNet50(nn.Module):
             resnet50 = models.resnet50(pretrained=False)
         elif pretrained_choice == 1:
             resnet50 = models.resnet50(pretrained=True)
-        elif pretrained_choice == 2:
-            # resnet50_trained_on_SIN
-            model_url = 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/6f41d2e86fc60566f78de64ecff35cc61eb6436f/resnet50_train_60_epochs-c8e5653e.pth.tar'
-            resnet50 = models.resnet50(pretrained=False)
-            checkpoint = model_zoo.load_url(model_url)
-            resnet50.load_state_dict(checkpoint['state_dict'])
-        elif pretrained_choice == 3:
-            # resnet50_trained_on_SIN_and_IN
-            model_url = 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/60b770e128fffcbd8562a3ab3546c1a735432d03/resnet50_train_45_epochs_combined_IN_SF-2a0d100e.pth.tar'
-            resnet50 = models.resnet50(pretrained=False)
-            checkpoint = model_zoo.load_url(model_url)
-            resnet50.load_state_dict(checkpoint['state_dict'])
-        elif pretrained_choice == 4:
-            # resnet50_trained_on_SIN_and_IN_then_finetuned_on_IN
-            model_url = 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/60b770e128fffcbd8562a3ab3546c1a735432d03/resnet50_finetune_60_epochs_lr_decay_after_30_start_resnet50_train_45_epochs_combined_IN_SF-ca06340c.pth.tar'
-            resnet50 = models.resnet50(pretrained=False)
-            checkpoint = model_zoo.load_url(model_url)
-            resnet50.load_state_dict(checkpoint['state_dict'])
         else:
-            raise NotImplementedError
+            # 2:resnet50_traind_on_SIN
+            # 3:resnet50_traind_on_SIN_and_IN
+            # 4:resnet50_trained_on_SIN_and_IN_then_finetuned_on_IN
+            model_urls = [
+                'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/6f41d2e86fc60566f78de64ecff35cc61eb6436f/resnet50_train_60_epochs-c8e5653e.pth.tar',
+                'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/60b770e128fffcbd8562a3ab3546c1a735432d03/resnet50_train_45_epochs_combined_IN_SF-2a0d100e.pth.tar',
+                'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/60b770e128fffcbd8562a3ab3546c1a735432d03/resnet50_finetune_60_epochs_lr_decay_after_30_start_resnet50_train_45_epochs_combined_IN_SF-ca06340c.pth.tar'
+            ]
+            model_url = model_urls[pretrained_choice-2]
+            checkpoint = model_zoo.load_url(model_url, map_location='cpu')
+            resnet50 = models.resnet50(pretrained=False)
+            resnet50 = torch.nn.DataParallel(resnet50)
+            resnet50.load_state_dict(checkpoint['state_dict'])
+            resnet50 = list(resnet50.children())[0]
 
         self.feature_extractor = nn.Sequential(*list(resnet50.children())[:-2])
 
