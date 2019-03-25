@@ -23,7 +23,7 @@ print('Is GPU available:', can_use_gpu)
 
 device = torch.device('cuda' if can_use_gpu else 'cpu')
 
-log_dir = '../../data/komonjo/logs/20190324/'
+log_dir = '../../data/komonjo/logs/20190325/'
 # selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([ 0,  1,  2,  3,  4,
 #                                                                                      5,  6,  10, 11, 12,
 #                                                                                      14, 15, 16, 17, 18, 
@@ -51,7 +51,7 @@ batchsize_validation = batchsize_train
 train_loader = DataLoader(train_dataset, batch_size=batchsize_train, shuffle=True)
 validation_loader = DataLoader(validation_dataset, batch_size=batchsize_validation)
 
-net = OCRResNet50(5*config.N_KINDS_OF_CHARACTERS, pretrained_choice=3)
+net = OCRResNet34(5*config.N_KINDS_OF_CHARACTERS, pretrained=True)
 net = net.to(device)
 
 optimizer = optim.SGD(net.parameters(), lr=1e-3, momentum=0.9, weight_decay=5e-4)
