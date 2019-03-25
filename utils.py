@@ -105,4 +105,13 @@ def compute_IOU(coordinates1, coordinates2):
     return intersection / (union + epsilon)
 
 
-#def NMS(bboxes1):
+def NMS(bboxes, border=0.3):
+    bbox_indexes = np.argsort(bboxes[0])[::-1]
+    NMS_result_indexes = list()
+
+    while len(bbox_indexes) != 0:
+        NMS_result_indexes.append(bbox_indexes[0])
+        IOUs = compute_IOU(bboxes[:, bbox_indexes[0]][1:],
+                           bboxes[:, bbox_indexes][1:])
+        bbox_indexes = bbox_indexes[IOUs < border]
+    return NMS_result_indexes
