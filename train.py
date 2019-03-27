@@ -23,16 +23,18 @@ print('Is GPU available:', can_use_gpu)
 
 device = torch.device('cuda' if can_use_gpu else 'cpu')
 
-log_dir = '../../data/komonjo/logs/experiment_recep/1x1/'
+log_dir = '../../data/komonjo/logs/result/'
 # selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([ 0,  1,  2,  3,  4,
 #                                                                                      5,  6,  10, 11, 12,
 #                                                                                      14, 15, 16, 17, 18, 
 #                                                                                      19, 20, 21, 22, 23, 
 #                                                                                      24, 25, 26])
-selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([6, 26])
-train_annotation_list, validation_annotation_list = train_test_split(selected_annotation_list,
-                                                                     test_size=0.1,
-                                                                     random_state=config.RANDOM_SEED)
+selected_annotation_list, _ = utils.prepare_selected_annotation_from_dataset_indexes([6, 12])
+train_annotation_list, test_annotation_list = train_test_split(selected_annotation_list,
+                                                               test_size=0.2,
+                                                               random_state=config.RANDOM_SEED)
+train_annotation_list, validation_annotation_list = train_test_split(train_annotation_list,
+                                                                    test_size=0.2)
 
 print('The number of training data:', len(train_annotation_list))
 print('The number of validation data:', len(validation_annotation_list))
